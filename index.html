@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Newsletter Story Builder</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f7fb; --paper:#fff; --ink:#0f172a; --muted:#6b7280;
+    --ring:rgba(15,23,42,.08); --brand:#1f6fff;
+    --shadow:0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
+    --radius:14px; --max:980px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    background:var(--bg); color:var(--ink);
+  }
+  .shell{max-width:var(--max); margin:24px auto; padding:0 16px}
+  .title{font-size:28px; font-weight:900; margin:8px 0 16px}
+  .row{display:grid; grid-template-columns:1.2fr .8fr; gap:18px}
+  @media (max-width:900px){ .row{grid-template-columns:1fr} }
+
+  .card{
+    background:var(--paper); border:1px solid var(--ring); border-radius:var(--radius);
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .card h2{margin:0; padding:16px; border-bottom:1px solid var(--ring); font-size:16px; letter-spacing:.02em}
+  .card .body{padding:16px}
+
+  .story{border:1px dashed #d6dae3; border-radius:10px; padding:12px; margin-bottom:12px; background:#fbfcff}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+  .field{display:flex; flex-direction:column; gap:6px}
+  label{font-size:12px; color:var(--muted); font-weight:700; letter-spacing:.02em}
+  input[type="text"], input[type="url"], textarea{
+    width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e5e7eb; background:#fff;
+    font-size:14px; color:var(--ink);
+  }
+  textarea{min-height:96px; resize:vertical}
+  .links{margin-top:10px}
+  .link-row{display:grid; grid-template-columns:1fr 1fr auto; gap:8px; align-items:end; margin-bottom:8px}
+  .btn{
+    appearance:none; border:none; border-radius:9px; padding:10px 12px; font-weight:800; cursor:pointer;
+    background:#eaf1ff; color:#1746d9;
+  }
+  .btn:hover{filter:brightness(.97)}
+  .btn.secondary{background:#eef1f4; color:#0f172a}
+  .btn.danger{background:#fee2e2; color:#991b1b}
+  .actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
+
+  /* Preview */
+  .preview{background:#f8faff; border-left:6px solid #dfe7ff}
+  .preview .body{padding:0}
+  .wrap{max-width:720px; margin:16px auto 30px; padding:0 16px; display:grid; gap:14px}
+  .n-card{background:var(--paper); border-radius:14px; border:1px solid var(--ring); box-shadow:var(--shadow); overflow:hidden}
+  .p16{padding:16px} .p20{padding:20px}
+  .tag{display:inline-flex; background:#eaf1ff; color:#1646d9; font-weight:800; font-size:12px; padding:6px 10px; border-radius:999px}
+  .n-card h1{margin:8px 0 0px; font-size:22px; font-weight:800}
+  .n-card p{margin:1px 0; line-height:1.66}
+  .n-card ul{margin:10px 0 0 18px}
+  .n-card li{margin:5px 0}
+</style>
+</head>
+<body>
+  <div class="shell">
+    <div class="title">Weekly Report Builder</div>
+
+    <div class="row">
+      <!-- Builder -->
+      <section class="card">
+        <h2>Enter your information below</h2>
+        <div class="body">
+          <div id="stories"></div>
+          <div class="actions">
+            <button class="btn" id="addStory">+ Add an Update</button>
+            <button class="btn secondary" id="clearAll">Clear All</button>
+            <button class="btn" id="generate">Generate Your Weekly Report</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Preview -->
+      <section class="card preview">
+        <h2>Live Preview</h2>
+        <div class="body">
+          <div class="wrap" id="preview"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+<script>
+const storiesEl = document.getElementById('stories');
+const previewEl = document.getElementById('preview');
+const addStoryBtn = document.getElementById('addStory');
+const clearBtn = document.getElementById('clearAll');
+const genBtn = document.getElementById('generate');
+
+let storyCount = 0;
+
+function makeLinkRow(storyId){
+  const row = document.createElement('div');
+  row.className = 'link-row';
+  row.innerHTML = `
+    <div class="field">
+      <label>Link Text</label>
+      <input type="text" placeholder="e.g., Read more" data-role="linkText">
+    </div>
+    <div class="field">
+      <label>URL</label>
+      <input type="url" placeholder="https://example.com" data-role="linkHref">
+    </div>
+    <button class="btn danger" type="button" data-role="removeLink">Remove</button>
+  `;
+  row.querySelector('[data-role="removeLink"]').addEventListener('click', () => {
+    row.parentElement.removeChild(row);
+    renderPreview();
+  });
+  // re-render when edited
+  row.querySelectorAll('input').forEach(i => i.addEventListener('input', renderPreview));
+  return row;
+}
+
+function addStory(){
+  storyCount += 1;
+  const id = `story-${storyCount}`;
+
+  const story = document.createElement('div');
+  story.className = 'story';
+  story.dataset.storyId = id;
+  story.innerHTML = `
+    <div class="grid">
+      <div class="field">
+        <label>Tag</label>
+        <input type="text" placeholder="e.g., MEDIA" data-role="tag">
+      </div>
+      <div class="field">
+        <label>Headline (H1)</label>
+        <input type="text" placeholder="Write a compelling headline…" data-role="title">
+      </div>
+    </div>
+    <div class="field" style="margin-top:0px;">
+      <label>Paragraph</label>
+      <textarea placeholder="Type your story body here…" data-role="body"></textarea>
+    </div>
+
+    <div class="links">
+      <div class="field" style="margin-bottom:6px;">
+        <label>Important Links</label>
+      </div>
+      <div data-role="linksWrap"></div>
+      <div class="actions">
+        <button class="btn" type="button" data-role="addLink">+ Add Link</button>
+        <button class="btn danger" type="button" data-role="removeStory">Remove Story</button>
+      </div>
+    </div>
+  `;
+
+  // link add/remove
+  const linksWrap = story.querySelector('[data-role="linksWrap"]');
+  story.querySelector('[data-role="addLink"]').addEventListener('click', () => {
+    linksWrap.appendChild(makeLinkRow(id));
+    renderPreview();
+  });
+
+  // remove story
+  story.querySelector('[data-role="removeStory"]').addEventListener('click', () => {
+    storiesEl.removeChild(story);
+    renderPreview();
+  });
+
+  // input listeners to refresh preview
+  story.querySelectorAll('input,textarea').forEach(el => el.addEventListener('input', renderPreview));
+
+  // start with one link row
+  linksWrap.appendChild(makeLinkRow(id));
+
+  storiesEl.appendChild(story);
+  renderPreview();
+}
+
+function collectData(){
+  const data = [];
+  storiesEl.querySelectorAll('.story').forEach(story => {
+    const tag = story.querySelector('[data-role="tag"]').value.trim();
+    const title = story.querySelector('[data-role="title"]').value.trim();
+    const body = story.querySelector('[data-role="body"]').value.trim();
+    const links = [];
+    story.querySelectorAll('.link-row').forEach(r => {
+      const text = r.querySelector('[data-role="linkText"]').value.trim();
+      const href = r.querySelector('[data-role="linkHref"]').value.trim();
+      if (text && href) links.push({ text, href });
+    });
+    if (tag || title || body || links.length){
+      data.push({ tag, title, body, links });
+    }
+  });
+  return data;
+}
+
+function renderPreview(){
+  const items = collectData();
+  previewEl.innerHTML = items.map(item => `
+    <article class="n-card">
+      <div class="p16"><span class="tag">${escapeHtml(item.tag || '')}</span>
+        <h1>${escapeHtml(item.title || '')}</h1>
+      </div>
+      <div class="p20">
+        <p>${escapeHtml(item.body || '')}</p>
+        ${item.links.length ? `
+          <ul>
+            ${item.links.map(l => `<li><a href="${escapeAttr(l.href)}" target="_blank" rel="noopener">${escapeHtml(l.text)}</a></li>`).join('')}
+          </ul>` : ``}
+      </div>
+    </article>
+  `).join('') || `<div style="padding:18px;color:var(--muted)">Add stories to see a preview…</div>`;
+}
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function escapeAttr(s){ return (s||'').replace(/"/g,'&quot;'); }
+
+function buildExportHTML(items){
+  const css = `
+  :root{
+    --bg:#f5f7fb; --paper:#ffffff; --ink:#0f172a; --muted:#6b7280;
+    --ring:rgba(15,23,42,.08); --shadow:0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
+    --radius:14px; --max:720px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:var(--max);margin:32px auto 80px;padding:0 16px;display:grid;gap:14px}
+  .card{background:var(--paper);border-radius:var(--radius);border:1px solid var(--ring);box-shadow:var(--shadow);overflow:hidden}
+  .p16{padding:16px}.p20{padding:20px}
+  .tag{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:#eaf1ff;color:#1646d9;font-size:12px;font-weight:800}
+  h1{margin:8px 0 6px;font-size:22px;font-weight:800}
+  p{margin:10px 0;line-height:1.65}
+  ul{margin:10px 0 0 18px} li{margin:6px 0}
+  `;
+  const body = items.map(it => `
+    <article class="card">
+      <div class="p16"><span class="tag">${escapeHtml(it.tag || '')}</span>
+        <h1>${escapeHtml(it.title || '')}</h1>
+      </div>
+      <div class="p20">
+        <p>${escapeHtml(it.body || '')}</p>
+        ${it.links?.length ? `<ul>${it.links.map(l=>`<li><a href="${escapeAttr(l.href)}">${escapeHtml(l.text)}</a></li>`).join('')}</ul>`:''}
+      </div>
+    </article>
+  `).join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Newsletter</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>${css}</style>
+</head>
+<body>
+  <main class="wrap">
+    ${body}
+  </main>
+</body>
+</html>`;
+}
+
+function download(filename, text){
+  const blob = new Blob([text], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url); a.remove();}, 0);
+}
+
+/* ─── Events ─────────────────────────────────────────────────────────────── */
+addStoryBtn.addEventListener('click', addStory);
+clearBtn.addEventListener('click', () => { storiesEl.innerHTML=''; renderPreview(); });
+genBtn.addEventListener('click', () => {
+  const items = collectData();
+  const html = buildExportHTML(items);
+  download('newsletter.html', html);
+});
+
+/* Start with one story */
+addStory();
+</script>
+</body>
+</html>
