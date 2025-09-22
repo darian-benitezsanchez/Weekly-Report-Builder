@@ -8,52 +8,75 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#f5f7fb; --paper:#fff; --ink:#0f172a; --muted:#6b7280;
-    --ring:rgba(15,23,42,.08); --brand:#1f6fff;
-    --shadow:0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
+    --bg:#f3f5f9; --paper:#ffffff; --ink:#0f172a; --muted:#64748b;
+    --ring:rgba(2,6,23,.08); --brand:#1b4ed8;
+    --shadow:0 1px 2px rgba(0,0,0,.05), 0 10px 30px rgba(2,6,23,.06);
     --radius:14px; --max:980px;
+
+    /* status colors */
+    --st-ontrack:#0f766e;         /* teal */
+    --st-awaiting:#8a6d1c;        /* amber-brown */
+    --st-onhold:#6b7280;          /* gray */
+    --st-support:#9a3412;         /* rust */
+    --st-final:#1f4c1b;           /* deep green */
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;background:var(--bg);color:var(--ink)}
   .shell{max-width:var(--max);margin:24px auto;padding:0 16px}
-  .title{font-size:28px;font-weight:900;margin:8px 0 16px}
+  .title{font-size:28px;font-weight:900;margin:8px 0 16px;letter-spacing:.2px}
 
-  .row{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+  .row{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
   @media (max-width:900px){.row{grid-template-columns:1fr}}
 
   .card{background:var(--paper);border:1px solid var(--ring);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-  .card h2{margin:0;padding:16px;border-bottom:1px solid var(--ring);font-size:16px;letter-spacing:.02em}
+  .card h2{margin:0;padding:14px 16px;border-bottom:1px solid var(--ring);font-size:15px;letter-spacing:.02em}
   .card .body{padding:16px}
 
-  .story{border:1px dashed #d6dae3;border-radius:10px;padding:12px;margin-bottom:12px;background:#fbfcff}
+  .story{border:1px dashed #d9dee7;border-radius:10px;padding:12px;margin-bottom:12px;background:#fbfcff}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .field{display:flex;flex-direction:column;gap:6px}
   label{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.02em}
-  input[type="text"],input[type="url"],input[type="date"],textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;font-size:14px;color:var(--ink)}
+  input[type="text"],input[type="url"],input[type="date"],select,textarea{
+    width:100%;padding:10px 12px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;font-size:14px;color:var(--ink)
+  }
   textarea{min-height:96px;resize:vertical}
   .links{margin-top:10px}
   .link-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:8px}
-  .btn{appearance:none;border:none;border-radius:9px;padding:10px 12px;font-weight:800;cursor:pointer;background:#eaf1ff;color:#1746d9}
-  .btn:hover{filter:brightness(.97)}
-  .btn.secondary{background:#eef1f4;color:#0f172a}
+  .btn{appearance:none;border:none;border-radius:9px;padding:10px 12px;font-weight:800;cursor:pointer;background:#e9efff;color:#173dcf}
+  .btn:hover{filter:brightness(.98)}
+  .btn.secondary{background:#eef2f6;color:#0f172a}
   .btn.danger{background:#fee2e2;color:#991b1b}
   .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
   .hint{font-size:12px;color:var(--muted);margin-top:8px}
 
   /* Preview */
-  .preview{background:#f8faff;border-left:6px solid #dfe7ff}
+  .preview{background:#f7f9ff;border-left:6px solid #d7e2ff}
   .preview .body{padding:0}
-  .wrap{max-width:720px;margin:16px auto 30px;padding:0 16px;display:grid;gap:14px}
-  .n-card{background:var(--paper);border-radius:14px;border:1px solid var(--ring);box-shadow:var(--shadow);overflow:hidden}
+  .wrap{max-width:760px;margin:16px auto 30px;padding:0 16px;display:grid;gap:16px}
+  .n-card{position:relative;background:var(--paper);border-radius:14px;border:1px solid var(--ring);box-shadow:var(--shadow);overflow:hidden}
   .p12{padding:12px}.p16{padding:16px}.p20{padding:20px}
 
   .hdr-title{font-size:24px;font-weight:900;margin:0}
   .hdr-dates{color:var(--muted);font-weight:600;margin-top:4px}
-  .tag{display:inline-flex;background:#eaf1ff;color:#1646d9;font-weight:800;font-size:12px;padding:6px 10px;border-radius:999px}
-  .n-card h1{margin:8px 0 6px;font-size:22px;font-weight:800}
-  .n-card p{margin:0 0 10px;line-height:1.66}
+  .hdr-overview{border-top:1px solid var(--ring);margin-top:8px;padding-top:10px}
+  .tag{display:inline-flex;background:#eaf1ff;color:#173dcf;font-weight:800;font-size:12px;padding:6px 10px;border-radius:999px}
+  .n-card h1{margin:8px 0 6px;font-size:20px;font-weight:800}
+  .n-card p{margin:0 0 10px;line-height:1.68}
   .n-card ul{margin:10px 0 0 18px}
   .n-card li{margin:5px 0}
+
+  /* status badge (top-right) */
+  .status-badge{
+    position:absolute; top:12px; right:12px;
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 10px; border-radius:999px; font-size:12px; font-weight:800;
+    background:#eef2f7; color:#334155; border:1px solid #e2e8f0;
+  }
+  .status-ontrack  { background:rgba(15,118,110,.08);  color:var(--st-ontrack);  border-color:rgba(15,118,110,.20); }
+  .status-awaiting { background:rgba(138,109,28,.08);  color:var(--st-awaiting); border-color:rgba(138,109,28,.20); }
+  .status-onhold   { background:rgba(107,114,128,.10); color:var(--st-onhold);   border-color:rgba(107,114,128,.22); }
+  .status-support  { background:rgba(154,52,18,.08);   color:var(--st-support);  border-color:rgba(154,52,18,.20); }
+  .status-final    { background:rgba(31,76,27,.08);    color:var(--st-final);    border-color:rgba(31,76,27,.20); }
 </style>
 </head>
 <body>
@@ -81,6 +104,10 @@
                 <label>End Date</label>
                 <input type="date" id="endDate">
               </div>
+            </div>
+            <div class="field" style="margin-top:10px;">
+              <label>Weekly Overview (Markdown supported: **bold**; blank line = new paragraph)</label>
+              <textarea id="overview" placeholder="Summarize key outcomes, risks, and next steps..."></textarea>
             </div>
           </div>
 
@@ -156,6 +183,15 @@ const saveHint = document.getElementById('saveHint');
 const titleEl = document.getElementById('reportTitle');
 const startEl = document.getElementById('startDate');
 const endEl = document.getElementById('endDate');
+const overviewEl = document.getElementById('overview');
+
+const STATUS_OPTIONS = [
+  'On Track',
+  'Awaiting Feedback',
+  'On Hold',
+  'Need Support',
+  'Finalized'
+];
 
 let storyCount = 0;
 let saveTimer = null;
@@ -182,7 +218,7 @@ function makeLinkRow(){
   return row;
 }
 
-function addStory(data = {tag:'',title:'',body:'',links:[{text:'',href:''}]}){
+function addStory(data = {tag:'',title:'',body:'',status:'On Track',links:[{text:'',href:''}]}){
   storyCount += 1;
   const story = document.createElement('div');
   story.className = 'story';
@@ -194,9 +230,23 @@ function addStory(data = {tag:'',title:'',body:'',links:[{text:'',href:''}]}){
       </div>
       <div class="field">
         <label>Headline (H1)</label>
-        <input type="text" data-role="title" placeholder="Write a compelling headline…" value="${escapeAttr(data.title)}">
+        <input type="text" data-role="title" placeholder="Write a concise headline…" value="${escapeAttr(data.title)}">
       </div>
     </div>
+
+    <div class="grid" style="margin-top:10px;">
+      <div class="field">
+        <label>Status</label>
+        <select data-role="status">
+          ${STATUS_OPTIONS.map(s=>`<option ${s===data.status?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <div style="font-size:12px;color:var(--muted);padding:10px 0">Choose the current disposition for this update.</div>
+      </div>
+    </div>
+
     <div class="field" style="margin-top:10px;">
       <label>Paragraphs (Markdown supported: **bold**; blank line = new paragraph)</label>
       <textarea data-role="body" placeholder="Type your story body here…">${escapeHtmlForTextarea(data.body)}</textarea>
@@ -235,7 +285,7 @@ function addStory(data = {tag:'',title:'',body:'',links:[{text:'',href:''}]}){
     renderPreview();
   });
 
-  story.querySelectorAll('input,textarea').forEach(el => el.addEventListener('input', renderPreview));
+  story.querySelectorAll('input,textarea,select').forEach(el => el.addEventListener('input', renderPreview));
 
   storiesEl.appendChild(story);
   renderPreview();
@@ -246,6 +296,7 @@ function collectMeta(){
     title: (titleEl.value || "Darian's Weekly Report").trim(),
     start: (startEl.value || '').trim(),
     end: (endEl.value || '').trim(),
+    overview: (overviewEl.value || '').trim(),
   };
 }
 
@@ -255,6 +306,7 @@ function collectData(){
     const tag = story.querySelector('[data-role="tag"]')?.value.trim() || '';
     const title = story.querySelector('[data-role="title"]')?.value.trim() || '';
     const body = story.querySelector('[data-role="body"]')?.value.trim() || '';
+    const status = story.querySelector('[data-role="status"]')?.value || 'On Track';
     const links = [];
     story.querySelectorAll('.link-row').forEach(r => {
       const text = r.querySelector('[data-role="linkText"]').value.trim();
@@ -262,10 +314,21 @@ function collectData(){
       if (text && href) links.push({ text, href });
     });
     if (tag || title || body || links.length){
-      data.push({ tag, title, body, links });
+      data.push({ tag, title, body, status, links });
     }
   });
   return data;
+}
+
+function statusClass(s){
+  switch((s||'').toLowerCase()){
+    case 'on track':          return 'status-ontrack';
+    case 'awaiting feedback': return 'status-awaiting';
+    case 'on hold':           return 'status-onhold';
+    case 'need support':      return 'status-support';
+    case 'finalized':         return 'status-final';
+    default:                  return '';
+  }
 }
 
 function renderHeader(meta){
@@ -277,6 +340,7 @@ function renderHeader(meta){
       <div class="p16">
         <h1 class="hdr-title">${escapeHtml(meta.title || "Darian's Weekly Report")}</h1>
         ${dateStr ? `<div class="hdr-dates">${escapeHtml(dateStr)}</div>` : ''}
+        ${meta.overview ? `<div class="hdr-overview">${renderBodyHTML(meta.overview)}</div>` : ''}
       </div>
     </article>
   `;
@@ -288,6 +352,7 @@ function renderPreview(){
 
   const storiesHtml = items.map(item => `
     <article class="n-card">
+      <div class="status-badge ${statusClass(item.status)}">${escapeHtml(item.status||'')}</div>
       <div class="p16"><span class="tag">${escapeHtml(item.tag || '')}</span>
         <h1>${escapeHtml(item.title || '')}</h1>
       </div>
@@ -301,7 +366,7 @@ function renderPreview(){
     </article>
   `).join('');
 
-  previewEl.innerHTML = renderHeader(meta) + (storiesHtml || `<div style="padding:18px;color:var(--muted)">Add stories to see a preview…</div>`);
+  previewEl.innerHTML = renderHeader(meta) + (storiesHtml || `<div style="padding:18px;color:var(--muted)">Add updates to see a preview…</div>`);
 
   // debounce async save
   scheduleSave();
@@ -320,19 +385,31 @@ function renderBodyHTML(text){
 
 function buildExportHTML(meta, items){
   const css = `
-  :root{--bg:#f5f7fb;--paper:#ffffff;--ink:#0f172a;--muted:#6b7280;--ring:rgba(15,23,42,.08);--shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06);--radius:14px;--max:720px}
+  :root{--bg:#f3f5f9;--paper:#ffffff;--ink:#0f172a;--muted:#64748b;--ring:rgba(2,6,23,.08);--shadow:0 1px 2px rgba(0,0,0,.05),0 10px 30px rgba(2,6,23,.06);--radius:14px;--max:760px;
+    --st-ontrack:#0f766e;--st-awaiting:#8a6d1c;--st-onhold:#6b7280;--st-support:#9a3412;--st-final:#1f4c1b}
   *{box-sizing:border-box}
   body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;background:var(--bg);color:var(--ink)}
-  .wrap{max-width:var(--max);margin:32px auto 80px;padding:0 16px;display:grid;gap:14px}
-  .card{background:var(--paper);border-radius:var(--radius);border:1px solid var(--ring);box-shadow:var(--shadow);overflow:hidden}
+  .wrap{max-width:var(--max);margin:32px auto 80px;padding:0 16px;display:grid;gap:16px}
+  .card{position:relative;background:var(--paper);border-radius:var(--radius);border:1px solid var(--ring);box-shadow:var(--shadow);overflow:hidden}
   .p16{padding:16px}.p20{padding:20px}
   .hdr-title{font-size:24px;font-weight:900;margin:0}
   .hdr-dates{color:var(--muted);font-weight:600;margin-top:4px}
-  .tag{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:#eaf1ff;color:#1646d9;font-size:12px;font-weight:800}
-  h1{margin:8px 0 6px;font-size:22px;font-weight:800}
-  p{margin:0 0 10px;line-height:1.65}
+  .hdr-overview{border-top:1px solid var(--ring);margin-top:8px;padding-top:10px}
+  .tag{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:#eaf1ff;color:#173dcf;font-size:12px;font-weight:800}
+  h1{margin:8px 0 6px;font-size:20px;font-weight:800}
+  p{margin:0 0 10px;line-height:1.68}
   ul{margin:10px 0 0 18px} li{margin:6px 0}
-  a{color:#1746d9;text-decoration:none} a:hover{text-decoration:underline}
+  a{color:#173dcf;text-decoration:none} a:hover{text-decoration:underline}
+  .status-badge{
+    position:absolute; top:12px; right:12px; display:inline-flex; align-items:center; gap:6px;
+    padding:6px 10px; border-radius:999px; font-size:12px; font-weight:800;
+    background:#eef2f7; color:#334155; border:1px solid #e2e8f0;
+  }
+  .status-ontrack  { background:rgba(15,118,110,.08);  color:var(--st-ontrack);  border-color:rgba(15,118,110,.20); }
+  .status-awaiting { background:rgba(138,109,28,.08);  color:var(--st-awaiting); border-color:rgba(138,109,28,.20); }
+  .status-onhold   { background:rgba(107,114,128,.10); color:var(--st-onhold);   border-color:rgba(107,114,128,.22); }
+  .status-support  { background:rgba(154,52,18,.08);   color:var(--st-support);  border-color:rgba(154,52,18,.20); }
+  .status-final    { background:rgba(31,76,27,.08);    color:var(--st-final);    border-color:rgba(31,76,27,.20); }
   `;
   const dateStr = (meta.start || meta.end) ? [meta.start, meta.end].filter(Boolean).join(' – ') : '';
   const header = `
@@ -340,12 +417,14 @@ function buildExportHTML(meta, items){
       <div class="p16">
         <h1 class="hdr-title">${escapeHtml(meta.title || "Darian's Weekly Report")}</h1>
         ${dateStr ? `<div class="hdr-dates">${escapeHtml(dateStr)}</div>` : ''}
+        ${meta.overview ? `<div class="hdr-overview">${renderBodyHTML(meta.overview)}</div>` : ''}
       </div>
     </article>
   `;
 
   const body = items.map(it => `
     <article class="card">
+      <div class="status-badge ${statusClass(it.status)}">${escapeHtml(it.status||'')}</div>
       <div class="p16"><span class="tag">${escapeHtml(it.tag || '')}</span>
         <h1>${escapeHtml(it.title || '')}</h1>
       </div>
@@ -387,7 +466,7 @@ function scheduleSave(){
   saveHint.textContent = 'Saving…';
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
-    const payload = { v:2, meta: collectMeta(), items: collectData(), ts: Date.now() };
+    const payload = { v:3, meta: collectMeta(), items: collectData(), ts: Date.now() };
     try{
       await idbSet(KEY, payload);
       saveHint.textContent = 'Autosaved.';
@@ -395,7 +474,7 @@ function scheduleSave(){
       saveHint.textContent = 'Save error (see console).';
       console.error('Autosave failed:', e);
     }
-  }, 400);
+  }, 350);
 }
 
 async function restoreDraft(){
@@ -406,6 +485,7 @@ async function restoreDraft(){
         titleEl.value = draft.meta.title || "Darian's Weekly Report";
         startEl.value = draft.meta.start || '';
         endEl.value = draft.meta.end || '';
+        overviewEl.value = draft.meta.overview || '';
       }
       if (draft.items?.length){
         storiesEl.innerHTML = '';
@@ -423,6 +503,7 @@ async function restoreDraft(){
 titleEl.addEventListener('input', renderPreview);
 startEl.addEventListener('input', renderPreview);
 endEl.addEventListener('input', renderPreview);
+overviewEl.addEventListener('input', renderPreview);
 
 addStoryBtn.addEventListener('click', ()=>addStory());
 clearBtn.addEventListener('click', async ()=>{
@@ -433,7 +514,7 @@ genBtn.addEventListener('click', () => {
   const meta = collectMeta();
   const items = collectData();
   const html = buildExportHTML(meta, items);
-  const base = (meta.start && meta.end) ? `${meta.start}_to_${meta.end}` : 'newsletter';
+  const base = (meta.start && meta.end) ? `${meta.start}_to_${meta.end}` : 'weekly_report';
   download(`${base}.html`, html);
 });
 
