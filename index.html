@@ -17,6 +17,7 @@
   body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;background:var(--bg);color:var(--ink)}
   .shell{max-width:var(--max);margin:24px auto;padding:0 16px}
   .title{font-size:28px;font-weight:900;margin:8px 0 16px}
+
   .row{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
   @media (max-width:900px){.row{grid-template-columns:1fr}}
 
@@ -28,7 +29,7 @@
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .field{display:flex;flex-direction:column;gap:6px}
   label{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.02em}
-  input[type="text"],input[type="url"],textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;font-size:14px;color:var(--ink)}
+  input[type="text"],input[type="url"],input[type="date"],textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;font-size:14px;color:var(--ink)}
   textarea{min-height:96px;resize:vertical}
   .links{margin-top:10px}
   .link-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:8px}
@@ -44,10 +45,12 @@
   .preview .body{padding:0}
   .wrap{max-width:720px;margin:16px auto 30px;padding:0 16px;display:grid;gap:14px}
   .n-card{background:var(--paper);border-radius:14px;border:1px solid var(--ring);box-shadow:var(--shadow);overflow:hidden}
-  .p16{padding:16px}.p20{padding:20px}
+  .p12{padding:12px}.p16{padding:16px}.p20{padding:20px}
+
+  .hdr-title{font-size:24px;font-weight:900;margin:0}
+  .hdr-dates{color:var(--muted);font-weight:600;margin-top:4px}
   .tag{display:inline-flex;background:#eaf1ff;color:#1646d9;font-weight:800;font-size:12px;padding:6px 10px;border-radius:999px}
   .n-card h1{margin:8px 0 6px;font-size:22px;font-weight:800}
-  /* tighter gap between H1 and first paragraph */
   .n-card p{margin:0 0 10px;line-height:1.66}
   .n-card ul{margin:10px 0 0 18px}
   .n-card li{margin:5px 0}
@@ -62,6 +65,25 @@
       <section class="card">
         <h2>Enter Your Updates Below</h2>
         <div class="body">
+
+          <!-- Report Header Meta -->
+          <div class="story" style="background:#fff">
+            <div class="field">
+              <label>Report Title</label>
+              <input type="text" id="reportTitle" value="Darian's Weekly Report" />
+            </div>
+            <div class="grid" style="margin-top:10px;">
+              <div class="field">
+                <label>Start Date</label>
+                <input type="date" id="startDate">
+              </div>
+              <div class="field">
+                <label>End Date</label>
+                <input type="date" id="endDate">
+              </div>
+            </div>
+          </div>
+
           <div id="stories"></div>
           <div class="actions">
             <button class="btn" id="addStory">+ Add Update</button>
@@ -131,6 +153,10 @@ const clearBtn = document.getElementById('clearAll');
 const genBtn = document.getElementById('generate');
 const saveHint = document.getElementById('saveHint');
 
+const titleEl = document.getElementById('reportTitle');
+const startEl = document.getElementById('startDate');
+const endEl = document.getElementById('endDate');
+
 let storyCount = 0;
 let saveTimer = null;
 
@@ -172,7 +198,7 @@ function addStory(data = {tag:'',title:'',body:'',links:[{text:'',href:''}]}){
       </div>
     </div>
     <div class="field" style="margin-top:10px;">
-      <label>Paragraph</label>
+      <label>Paragraphs (Markdown supported: **bold**; blank line = new paragraph)</label>
       <textarea data-role="body" placeholder="Type your story body here…">${escapeHtmlForTextarea(data.body)}</textarea>
     </div>
 
@@ -215,12 +241,20 @@ function addStory(data = {tag:'',title:'',body:'',links:[{text:'',href:''}]}){
   renderPreview();
 }
 
+function collectMeta(){
+  return {
+    title: (titleEl.value || "Darian's Weekly Report").trim(),
+    start: (startEl.value || '').trim(),
+    end: (endEl.value || '').trim(),
+  };
+}
+
 function collectData(){
   const data = [];
   storiesEl.querySelectorAll('.story').forEach(story => {
-    const tag = story.querySelector('[data-role="tag"]').value.trim();
-    const title = story.querySelector('[data-role="title"]').value.trim();
-    const body = story.querySelector('[data-role="body"]').value.trim();
+    const tag = story.querySelector('[data-role="tag"]')?.value.trim() || '';
+    const title = story.querySelector('[data-role="title"]')?.value.trim() || '';
+    const body = story.querySelector('[data-role="body"]')?.value.trim() || '';
     const links = [];
     story.querySelectorAll('.link-row').forEach(r => {
       const text = r.querySelector('[data-role="linkText"]').value.trim();
@@ -234,28 +268,57 @@ function collectData(){
   return data;
 }
 
+function renderHeader(meta){
+  const dateStr = (meta.start || meta.end)
+    ? [meta.start, meta.end].filter(Boolean).join(' – ')
+    : '';
+  return `
+    <article class="n-card">
+      <div class="p16">
+        <h1 class="hdr-title">${escapeHtml(meta.title || "Darian's Weekly Report")}</h1>
+        ${dateStr ? `<div class="hdr-dates">${escapeHtml(dateStr)}</div>` : ''}
+      </div>
+    </article>
+  `;
+}
+
 function renderPreview(){
+  const meta = collectMeta();
   const items = collectData();
-  previewEl.innerHTML = items.map(item => `
+
+  const storiesHtml = items.map(item => `
     <article class="n-card">
       <div class="p16"><span class="tag">${escapeHtml(item.tag || '')}</span>
         <h1>${escapeHtml(item.title || '')}</h1>
       </div>
       <div class="p20">
-        <p>${escapeHtml(item.body || '')}</p>
+        ${renderBodyHTML(item.body || '')}
         ${item.links.length ? `
           <ul>
             ${item.links.map(l => `<li><a href="${escapeAttr(l.href)}" target="_blank" rel="noopener">${escapeHtml(l.text)}</a></li>`).join('')}
           </ul>` : ``}
       </div>
     </article>
-  `).join('') || `<div style="padding:18px;color:var(--muted)">Add stories to see a preview…</div>`;
+  `).join('');
+
+  previewEl.innerHTML = renderHeader(meta) + (storiesHtml || `<div style="padding:18px;color:var(--muted)">Add stories to see a preview…</div>`);
 
   // debounce async save
   scheduleSave();
 }
 
-function buildExportHTML(items){
+/* ============ Markdown (bold) + paragraphs to HTML ============ */
+function renderBodyHTML(text){
+  // Escape HTML first
+  let s = (text || '').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  // Convert **bold** (simple, non-greedy)
+  s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Split into paragraphs on blank lines
+  const paras = s.trim() ? s.split(/\n\s*\n/).map(p => `<p>${p.replace(/\n/g,'<br>')}</p>`) : [];
+  return paras.join('') || '<p></p>';
+}
+
+function buildExportHTML(meta, items){
   const css = `
   :root{--bg:#f5f7fb;--paper:#ffffff;--ink:#0f172a;--muted:#6b7280;--ring:rgba(15,23,42,.08);--shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06);--radius:14px;--max:720px}
   *{box-sizing:border-box}
@@ -263,18 +326,31 @@ function buildExportHTML(items){
   .wrap{max-width:var(--max);margin:32px auto 80px;padding:0 16px;display:grid;gap:14px}
   .card{background:var(--paper);border-radius:var(--radius);border:1px solid var(--ring);box-shadow:var(--shadow);overflow:hidden}
   .p16{padding:16px}.p20{padding:20px}
+  .hdr-title{font-size:24px;font-weight:900;margin:0}
+  .hdr-dates{color:var(--muted);font-weight:600;margin-top:4px}
   .tag{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:#eaf1ff;color:#1646d9;font-size:12px;font-weight:800}
   h1{margin:8px 0 6px;font-size:22px;font-weight:800}
   p{margin:0 0 10px;line-height:1.65}
   ul{margin:10px 0 0 18px} li{margin:6px 0}
+  a{color:#1746d9;text-decoration:none} a:hover{text-decoration:underline}
   `;
+  const dateStr = (meta.start || meta.end) ? [meta.start, meta.end].filter(Boolean).join(' – ') : '';
+  const header = `
+    <article class="card">
+      <div class="p16">
+        <h1 class="hdr-title">${escapeHtml(meta.title || "Darian's Weekly Report")}</h1>
+        ${dateStr ? `<div class="hdr-dates">${escapeHtml(dateStr)}</div>` : ''}
+      </div>
+    </article>
+  `;
+
   const body = items.map(it => `
     <article class="card">
       <div class="p16"><span class="tag">${escapeHtml(it.tag || '')}</span>
         <h1>${escapeHtml(it.title || '')}</h1>
       </div>
       <div class="p20">
-        <p>${escapeHtml(it.body || '')}</p>
+        ${renderBodyHTML(it.body || '')}
         ${it.links?.length ? `<ul>${it.links.map(l=>`<li><a href="${escapeAttr(l.href)}">${escapeHtml(l.text)}</a></li>`).join('')}</ul>`:''}
       </div>
     </article>
@@ -284,12 +360,13 @@ function buildExportHTML(items){
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Newsletter</title>
+<title>${escapeHtml(meta.title || "Darian's Weekly Report")}</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>${css}</style>
 </head>
 <body>
   <main class="wrap">
+    ${header}
     ${body}
   </main>
 </body>
@@ -310,7 +387,7 @@ function scheduleSave(){
   saveHint.textContent = 'Saving…';
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
-    const payload = { v:1, items: collectData(), ts: Date.now() };
+    const payload = { v:2, meta: collectMeta(), items: collectData(), ts: Date.now() };
     try{
       await idbSet(KEY, payload);
       saveHint.textContent = 'Autosaved.';
@@ -324,10 +401,18 @@ function scheduleSave(){
 async function restoreDraft(){
   try{
     const draft = await idbGet(KEY);
-    if (draft?.items?.length){
-      storiesEl.innerHTML = '';
-      draft.items.forEach(it => addStory(it));
-      return;
+    if (draft){
+      if (draft.meta){
+        titleEl.value = draft.meta.title || "Darian's Weekly Report";
+        startEl.value = draft.meta.start || '';
+        endEl.value = draft.meta.end || '';
+      }
+      if (draft.items?.length){
+        storiesEl.innerHTML = '';
+        draft.items.forEach(it => addStory(it));
+        renderPreview();
+        return;
+      }
     }
   }catch(e){ console.warn('Restore failed:', e); }
   // if nothing saved, start with one blank story
@@ -335,15 +420,21 @@ async function restoreDraft(){
 }
 
 /* =================== Events =================== */
+titleEl.addEventListener('input', renderPreview);
+startEl.addEventListener('input', renderPreview);
+endEl.addEventListener('input', renderPreview);
+
 addStoryBtn.addEventListener('click', ()=>addStory());
 clearBtn.addEventListener('click', async ()=>{
   storiesEl.innerHTML=''; renderPreview();
   try{ await idbDel(KEY); saveHint.textContent = 'Cleared.'; }catch(e){ console.warn(e); }
 });
 genBtn.addEventListener('click', () => {
+  const meta = collectMeta();
   const items = collectData();
-  const html = buildExportHTML(items);
-  download('newsletter.html', html);
+  const html = buildExportHTML(meta, items);
+  const base = (meta.start && meta.end) ? `${meta.start}_to_${meta.end}` : 'newsletter';
+  download(`${base}.html`, html);
 });
 
 /* =================== Boot =================== */
